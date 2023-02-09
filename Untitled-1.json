@@ -1,0 +1,23 @@
+{
+    "collection": {
+        "href": "https://images-api.nasa.gov/asset/as11-40-5874",
+        "items": [
+            {
+                "href": "https://images-assets.nasa.gov/image/as11-40-5874/as11-40-5874~orig.jpg"
+            },
+            {
+                "href": "https://images-assets.nasa.gov/image/as11-40-5874/as11‐40‐5874~medium.jpg"
+            },
+            {
+                "href": "https://images-assets.nasa.gov/image/as11-40-5874/as11‐40‐5874~small.jpg"
+            },
+            {
+                "href": "https://images-assets.nasa.gov/image/as11-40-5874/as11‐40‐5874~thumb.jpg"
+            },
+            {
+                "href": "https://images-assets.nasa.gov/image/as11-40-5874/metadata.json"
+            }
+        ],
+        "version": "1.0"
+    }
+}
