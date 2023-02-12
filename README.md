@@ -462,7 +462,7 @@ Like search results, album contents will come in the form of Collection + JSON, 
             },
         ],
     },
-],
+},
 "links": [
     {
         "href": "https.",
