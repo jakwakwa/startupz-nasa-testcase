@@ -1,12 +1,21 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
-
 * {
   box-sizing: border-box;
+}
+
+.img-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 1rem;
+}
+
+body {
+  display: block !important;
+  /* flex: 0 0 100% !important; */
+  width: 100vw !important;
+  min-height: 100vh !important;
+  height: auto;
 }
 
 h1 {
@@ -51,73 +60,9 @@ h2 {
   }
 }
 
-.card {
-  margin: 0 auto;
-  padding: 0;
-  display: flex;
-  width: 100%;
-  align-items: center;
-  margin-top: 3rem;
-  gap: 0.8rem;
-  width: 100%;
-}
+.
 
-.card-col.card-firstItem {
-  margin-top: 0;
-  width: 60%;
-}
-.card-col.card-otherItems {
-  width: 25%;
-}
-
-.card-col.card-lastItems {
-  width: 15%;
-  padding: 0;
-  margin: 0;
-  /* height: 0; */
-  /* height: 90px; */
-}
-
-.card-col {
-  display: flex;
-  flex-direction: row;
-  align-content: center;
-  text-align: left;
-  width: 20%;
-}
-
-.card-col--flexRow {
-  align-content: center;
-  flex-direction: row;
-  align-items: flex-end;
-  text-align: left;
-  /* height: 30px; */
-  width: 100%;
-}
-.card-col--flexRow button {
-  /* height: 50px; */
-  /* height: auto; */
-  width: 100px;
-  margin: 0;
-  /* padding: 0.7rem; */
-}
-.card-col--flexRow input {
-  /* height: 90px; */
-  margin: 0;
-  padding: 1rem;
-  width: 100%;
-}
-
-.card-col--flexCol {
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  gap: 0.4rem;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-}
-.card-col--flexCol button {
+/* .card-col--flexCol button {
   width: 100%;
   margin: 0;
   padding: 1rem 1.2rem;
@@ -127,20 +72,7 @@ h2 {
   text-transform: uppercase;
   font-size: 0.65rem;
   border-radius: 1rem;
-}
-.card-col--flexCol input {
-  margin: 0;
-  padding: 1rem;
-  width: 100%;
-}
-
-.card .dateStart {
-  width: 100%;
-}
-
-.card .dateEnd {
-  width: 100%;
-}
+} */
 
 label {
   font-size: 0.7rem;
