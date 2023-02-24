@@ -1,11 +1,14 @@
 export interface ISearchResults {
-  data: {
-    photographer: string;
-    nasa_id: string;
-    title: string;
-    location: string;
-    description: string;
-    date_created: string;
-  }[];
-  links: { href: string | undefined }[];
+  [x: string]: any;
+  length: any;
+  photographer: string;
+  nasa_id: string;
+  title: string;
+  location: string;
+  description: string;
+  date_created: string;
+}
+
+export interface IAssetData {
+  data: ISearchResults[] | [];
 }

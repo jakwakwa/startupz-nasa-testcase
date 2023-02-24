@@ -12,7 +12,6 @@
 
 body {
   display: block !important;
-  /* flex: 0 0 100% !important; */
   width: 100vw !important;
   min-height: 100vh !important;
   height: auto;
@@ -59,20 +58,6 @@ h2 {
     animation: logo-spin infinite 20s linear;
   }
 }
-
-.
-
-/* .card-col--flexCol button {
-  width: 100%;
-  margin: 0;
-  padding: 1rem 1.2rem;
-  height: 3.4rem;
-  background-color: mediumslateblue;
-  display: inline-block;
-  text-transform: uppercase;
-  font-size: 0.65rem;
-  border-radius: 1rem;
-} */
 
 label {
   font-size: 0.7rem;

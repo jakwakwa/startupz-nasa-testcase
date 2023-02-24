@@ -8,7 +8,7 @@ export function validateName(value: string): string {
   return error;
 }
 
-export function arrayRange(start, stop, step) {
+export function arrayRange(start: number, stop: number, step: number) {
   return Array.from(
     { length: (stop - start) / step + 1 },
     (value, index) => start + index * step

@@ -1,8 +1,7 @@
-import { useState } from "react";
 import "./App.css";
-import imgUrl from "./assets/images/nasa.jpg";
+
 import Search from "./pages/Search/Search";
-import { Box, Container, Heading, Stack } from "@chakra-ui/react";
+import { Container, Heading, Stack } from "@chakra-ui/react";
 
 function App() {
   return (

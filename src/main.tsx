@@ -8,22 +8,16 @@ import { createBrowserRouter, RouterProvider, Route } from "react-router-dom";
 import ShowPage from "./pages/ShowPage/ShowPage";
 
 import "@fontsource/montserrat/800.css";
-import "@fontsource/montserrat/700.css";
-import "@fontsource/montserrat/400.css";
-import "@fontsource/montserrat/600.css";
-// import "@fontsource/aero03/400.css";
-// import "@fontsource/aero03/500.css";
-// import "@fontsource/aero03/700.css";
 
 // 1. Import `extendTheme`
 import { extendTheme } from "@chakra-ui/react";
 
 import imgUrl from "./assets/images/nasa2.jpg";
-// 2. Call `extendTheme` and pass your custom values
+
 const theme = extendTheme({
   fonts: {
     body: `'Montserrat', sans-serif`,
-    heading: `'Aero_03', sans-serif`,
+    heading: `'Montserrat', sans-serif`,
   },
   styles: {
     global: {

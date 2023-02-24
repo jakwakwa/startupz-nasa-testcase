@@ -17,7 +17,7 @@ interface SearchResultsContext {
 
 interface CurrentUserContextType {
   searchResults: SearchResultsContext;
-}§
+}
 
 const SearchContext = React.createContext<CurrentUserContextType | null>({
   searchResults: {

@@ -26,7 +26,13 @@ import { UilLocationPoint, UilShutter } from "@iconscout/react-unicons";
 import axios, { AxiosError, AxiosResponse } from "axios";
 
 import { Field, Form, Formik, FormikHelpers } from "formik";
-import { useState } from "react";
+import {
+  JSXElementConstructor,
+  ReactElement,
+  ReactFragment,
+  ReactPortal,
+  useState,
+} from "react";
 import { Link } from "react-router-dom";
 import { FieldProps } from "../../types/searchTypes";
 import { arrayRange, validateName } from "../../utils/formHelpers";
@@ -34,6 +40,8 @@ import * as yup from "yup";
 import { ISearchResults } from "../../types/ISearchResults";
 import { IFormValues } from "../../types/IFormValues";
 const { setLocale } = yup;
+import imgFallback from "../../assets/images/image-load.png";
+import imgError from "../../assets/images/nasa3.jpg";
 
 setLocale({
   mixed: {
@@ -45,15 +53,15 @@ setLocale({
 
 const initialSearchFormValues: IFormValues = {
   name: "",
-  dateStart: null,
-  dateEnd: null,
+  dateStart: "",
+  dateEnd: "",
 };
 
 const Search = () => {
   const [querySubmitted, setQuerySubmitted] = useState(false);
   const [queryResults, setQueryResults] = useState(initialSearchFormValues);
 
-  const [data, setData] = useState<ISearchResults[] | null>(null);
+  const [data, setData] = useState<ISearchResults | null>(null);
   const [loading, setLoading] = useState(false);
   const [uiLoading, setUiLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -67,7 +75,7 @@ const Search = () => {
       setUiLoading(true);
       const response: AxiosResponse = await axios.get(
         `${API_URL}/search?q=${query.name}&media_type=image${
-          query.dateStart !== null && query.dateEnd !== null
+          query.dateStart !== "" && query.dateEnd !== ""
             ? `&year_start=${query.dateStart}&year_end=${query.dateEnd}`
             : ""
         }`
@@ -84,7 +92,7 @@ const Search = () => {
 
   let yearFieldOptions: number[] = [];
   const currentYear = new Date().getFullYear();
-  yearFieldOptions = arrayRange(1900, currentYear, 1);
+  yearFieldOptions = arrayRange(2000, currentYear, 1);
 
   const searchSchema = yup.object().shape(
     {
@@ -92,9 +100,10 @@ const Search = () => {
 
       dateStart: yup
         .number()
+        .min(1900)
         .max(currentYear)
         .when("dateEnd", (dateEnd: any) => {
-          if (dateEnd > 0 && dateEnd !== null) {
+          if (dateEnd > 1900 && dateEnd !== undefined) {
             return yup.number().required();
           } else {
             return yup.number().notRequired();
@@ -105,16 +114,15 @@ const Search = () => {
         .number()
         .max(currentYear)
         .when("dateStart", (dateStart: any, schema: yup.NumberSchema) => {
-          if (dateStart > 0 && dateStart !== null) {
+          if (dateStart > 0 && dateStart !== undefined) {
             return (
               dateStart &&
-              schema.min(
-                dateStart,
-                "enter same year or earlier than the start date"
-              )
+              schema
+                .min(dateStart, "End Date can't be earlier than Start Date")
+                .required()
             );
           } else {
-            return yup.number().notRequired();
+            return yup.number().min(1900).notRequired();
           }
         }),
     },
@@ -140,7 +148,7 @@ const Search = () => {
         validationSchema={searchSchema}
       >
         {(props) => (
-          <Form style={{ width: "100%" }}>
+          <Form role="form" style={{ width: "100%" }} aria-label="Search Form">
             <Grid>
               <Card
                 p={["1rem", "1rem", "1.2rem", "1.3rem"]}
@@ -159,6 +167,7 @@ const Search = () => {
                           >
                             <FormLabel fontSize={"xs"}>Search</FormLabel>
                             <Input
+                              role={"textbox"}
                               {...field}
                               placeholder="search for images"
                               _placeholder={{
@@ -167,6 +176,7 @@ const Search = () => {
                                 fontSize: "0.9rem",
                                 fontStyle: "italic",
                               }}
+                              aria-label="Search Input"
                             />
                             <FormHelperText
                               fontSize={"0.5rem"}
@@ -195,17 +205,16 @@ const Search = () => {
                                 </FormLabel>
                                 <Select
                                   {...field}
+                                  role={"combobox"}
                                   style={{
                                     opacity: "0.1 !important",
                                     color: "inherit",
                                     fontSize: "0.8rem",
                                   }}
+                                  aria-label="Date Start Field"
+                                  defaultValue={undefined}
                                 >
-                                  <option
-                                    selected={true}
-                                    disabled={true}
-                                    value=""
-                                  >
+                                  <option disabled value={""}>
                                     Select year
                                   </option>
                                   {yearFieldOptions?.map((year) => (
@@ -237,17 +246,16 @@ const Search = () => {
                                 <FormLabel fontSize={"xs"}>End Date</FormLabel>
                                 <Select
                                   {...field}
+                                  role={"combobox"}
                                   style={{
                                     opacity: "0.1 !important",
                                     color: "inherit",
                                     fontSize: "0.8rem",
                                   }}
+                                  aria-label="Date End Field"
+                                  defaultValue={undefined}
                                 >
-                                  <option
-                                    selected={true}
-                                    disabled={true}
-                                    value=""
-                                  >
+                                  <option disabled value="">
                                     Select year
                                   </option>
                                   {yearFieldOptions?.map((year) => (
@@ -256,11 +264,16 @@ const Search = () => {
                                     </option>
                                   ))}
                                 </Select>
-
                                 <FormHelperText fontSize={"0.5rem"}>
                                   Optional
                                 </FormHelperText>
-                                <FormErrorMessage fontSize="xs">
+
+                                <FormErrorMessage
+                                  role="container"
+                                  fontSize="xs"
+                                  className="dateEndError"
+                                  aria-label="Date End Error"
+                                >
                                   {form.errors.dateEnd}
                                 </FormErrorMessage>
                               </FormControl>
@@ -276,10 +289,12 @@ const Search = () => {
                       width={["100%", "100%", "20%", "19%"]}
                     >
                       <Button
+                        role={"button"}
                         width="100%"
                         colorScheme="purple"
                         isLoading={props.isSubmitting}
                         type="submit"
+                        aria-label="submit"
                       >
                         Search
                       </Button>
@@ -321,84 +336,102 @@ const Search = () => {
             gap={"20px"}
             padding={["20px", "10px", "50px", "0px"]}
           >
-            {data?.map((item) => (
-              <Box key={item.data[0].nasa_id} width="100%">
-                <Link to={`/show/${item.data[0].nasa_id}`}>
-                  <Card
-                    height={["300px", "320px", "330px", "380px"]}
-                    variant="elevated"
-                    overflow={"hidden"}
-                  >
-                    <CardBody>
-                      <Box>
-                        <Center>
-                          <Image
-                            borderRadius="lg"
-                            objectFit="cover"
-                            width="100%"
-                            height={["120px", "120px", "130px", "170px"]}
-                            src={item.links[0].href}
-                          />
-                        </Center>
-                      </Box>
+            {data?.map(
+              (item: {
+                data: {
+                  photographer: string | undefined;
+                  nasa_id: string | undefined;
+                  title: string | undefined;
+                  location: string | undefined;
+                }[];
+                links: { href: string | undefined }[];
+              }) => (
+                <Box key={item.data[0].nasa_id} width="100%">
+                  <Link to={`/show/${item.data[0].nasa_id}`}>
+                    <Card
+                      height={["300px", "320px", "330px", "380px"]}
+                      variant="elevated"
+                      overflow={"hidden"}
+                    >
+                      <CardBody>
+                        <Box>
+                          <Center>
+                            <Image
+                              borderRadius="lg"
+                              objectFit="cover"
+                              width="100%"
+                              height={["120px", "120px", "130px", "170px"]}
+                              fallbackSrc={`${imgFallback}`}
+                              src={`${
+                                item.links[0].href
+                                  ? item.links[0].href
+                                  : !item.links[0].href
+                                  ? imgError
+                                  : null
+                              }`}
+                            />
+                          </Center>
+                        </Box>
 
-                      <Stack mt="6" spacing="2">
-                        <Heading
-                          style={{
-                            display: "-webkit-box",
-                            textOverflow: "ellipsis",
-                            WebkitLineClamp: 3,
-                            WebkitBoxOrient: "vertical",
-                            overflow: "hidden",
-                          }}
-                          textAlign={"left"}
-                          size="xs"
-                        >
-                          {item.data[0].title}
-                        </Heading>
-                        <HStack>
-                          <Icon as={UilLocationPoint} />
-                          <Text
+                        <Stack mt="6" spacing="2">
+                          <Heading
                             style={{
+                              display: "-webkit-box",
                               textOverflow: "ellipsis",
-
+                              WebkitLineClamp: 3,
+                              WebkitBoxOrient: "vertical",
                               overflow: "hidden",
-                              whiteSpace: "nowrap",
                             }}
-                            fontSize="xs"
+                            textAlign={"left"}
+                            size="xs"
                           >
-                            {item.data[0].location
-                              ? item.data[0].location
-                              : "N/A"}
-                          </Text>
-                        </HStack>
-                        <HStack>
-                          <Icon as={UilShutter} />
-                          <Text
-                            style={{
-                              textOverflow: "ellipsis",
+                            {item.data[0].title}
+                          </Heading>
+                          <HStack>
+                            <Icon as={UilLocationPoint} />
+                            <Text
+                              style={{
+                                textOverflow: "ellipsis",
 
-                              overflow: "hidden",
-                              whiteSpace: "nowrap",
-                            }}
-                            textAlign="left"
-                            fontSize="xs"
-                          >
-                            {item.data[0].photographer
-                              ? item.data[0].photographer
-                              : "N/A"}
-                          </Text>
-                        </HStack>
-                      </Stack>
-                    </CardBody>
-                  </Card>
-                </Link>
-              </Box>
-            ))}
+                                overflow: "hidden",
+                                whiteSpace: "nowrap",
+                              }}
+                              fontSize="xs"
+                            >
+                              {item.data[0].location
+                                ? item.data[0].location
+                                : "N/A"}
+                            </Text>
+                          </HStack>
+                          <HStack>
+                            <Icon as={UilShutter} />
+                            <Text
+                              style={{
+                                textOverflow: "ellipsis",
+
+                                overflow: "hidden",
+                                whiteSpace: "nowrap",
+                              }}
+                              textAlign="left"
+                              fontSize="xs"
+                            >
+                              {item.data[0].photographer
+                                ? item.data[0].photographer
+                                : "N/A"}
+                            </Text>
+                          </HStack>
+                        </Stack>
+                      </CardBody>
+                    </Card>
+                  </Link>
+                </Box>
+              )
+            )}
           </SimpleGrid>
         </>
       ) : null}
-      {querySubmitted && !loading && !data ? (
+
+      {querySubmitted && !loading && data?.length === 0 ? (
         <Box margin="3rem">
           <Stack align={"center"} spacing="5">
             <Text>

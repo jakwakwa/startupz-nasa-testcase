@@ -10,24 +10,30 @@ import {
   Button,
   Spinner,
   Icon,
+  Grid,
+  SimpleGrid,
+  CardBody,
+  Center,
 } from "@chakra-ui/react";
 import axios, { AxiosResponse, AxiosError } from "axios";
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import moment from "moment";
 // import { Img } from "@chakra-ui/react";
-import imgUrl from "../../assets/images/img-load-02.gif";
+import imgUrl from "../../assets/images/image-load.png";
 import {
   UilLocationPoint,
   UilShutter,
   UilCalendarAlt,
+  UilTag,
 } from "@iconscout/react-unicons";
-
+import imgError from "../../assets/images/nasa3.jpg";
 interface IAssetData {
   date_created: any;
   description: any;
   keywords: any;
   location: any;
+  album?: string[];
   nasa_id: any;
   title: any;
   media_type: any;
@@ -42,26 +48,29 @@ interface ICollection {
   };
 }
 
-const ShowPage = () => {
-  const [querySubmitted, setQuerySubmitted] = useState(false);
+interface IAlbum {
+  links: { href: string }[];
+}
 
+const ShowPage = () => {
   const [assetData, setAssetData] = useState<IAssetData | null>(null);
+  const [album, setAlbum] = useState<IAlbum[] | null>(null);
   const [imgData, setImgData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const API_URL = "https://images-api.nasa.gov";
   let params = useParams();
   const navigate = useNavigate();
+
   useEffect(() => {
     const getShowResults = async (queryId: string | undefined) => {
       try {
         setLoading(true);
-        setQuerySubmitted(false);
         const response: AxiosResponse = await axios.get(
           `${API_URL}/asset/${queryId}`
         );
         const responseData = response.data;
-        setImgData(responseData.collection.items[0].href);
+        setImgData(responseData.collection.items[3].href);
         setError(null);
       } catch (err: AxiosError | any) {
         setError(err?.message || { err: "Something went wrong" });
@@ -74,11 +83,31 @@ const ShowPage = () => {
   }, []);
 
   useEffect(() => {
+    const getAlbumResults = async (queryId: string | undefined) => {
+      try {
+        setLoading(true);
+        const response: AxiosResponse = await axios.get(
+          `${API_URL}/album/${assetData?.album}`
+        );
+        const responseData = response.data.collection.items;
+        setAlbum(responseData);
+        setError(null);
+      } catch (err: AxiosError | any) {
+        setError(err?.message || { err: "Something went wrong" });
+        setAlbum(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (assetData?.album) {
+      getAlbumResults(assetData?.album[0]);
+    }
+  }, [assetData]);
+
+  useEffect(() => {
     const getLocation = async (queryId: string | undefined) => {
       try {
         setLoading(true);
-        setQuerySubmitted(false);
-
         const response: AxiosResponse = await axios.get(
           `${API_URL}/search?q=${queryId}`
         );
@@ -116,19 +145,18 @@ const ShowPage = () => {
               direction={["column", "column-reverse", "row", "row"]}
               gap="20px"
             >
-              {assetData === null || loading ? (
-                <Spinner color="white" />
-              ) : (
+              {!loading ? (
                 <Image
                   shadow="lg"
                   borderRadius="lg"
                   objectFit="cover"
                   width={["100%", "100%", "40%", "50%"]}
                   height={["auto"]}
+                  maxH="500px"
                   fallbackSrc={`${imgUrl}`}
-                  src={`${imgData}`}
+                  src={`${imgData ? imgData : !imgData ? imgError : null}`}
                 />
-              )}
+              ) : null}
 
               <Box p={["50px", "20px", "40px", "40px"]}>
                 <Stack>
@@ -180,6 +208,96 @@ const ShowPage = () => {
                       {assetData?.description}
                     </Text>
                   </Flex>
+                  <Box pb="20px">
+                    {" "}
+                    <Text fontSize={"0.6rem"} fontWeight={"bold"}>
+                      Keywords:{" "}
+                    </Text>
+                    <Flex direction={"row"} gap="5px" flexWrap={"wrap"}>
+                      {assetData?.keywords.map((keyword: any) => {
+                        return (
+                          <Card p={["2px", "3px", "3px", "3px"]}>
+                            <Flex
+                              direction={"row"}
+                              alignItems={"center"}
+                              justify="center"
+                              gap="3px"
+                              p={["2px", "3px", "3px", "3px"]}
+                            >
+                              <Box>
+                                <Icon fontSize="0.6rem" as={UilTag} />
+                              </Box>
+
+                              <Box>
+                                <Text
+                                  key={keyword}
+                                  color="purple.500"
+                                  fontSize="0.6rem"
+                                  fontWeight="light"
+                                  mr="5px"
+                                >
+                                  {keyword}
+                                </Text>
+                              </Box>
+                            </Flex>
+                          </Card>
+                        );
+                      })}
+                    </Flex>
+                  </Box>
+                  {album ? (
+                    <Box width={"100%"}>
+                      <Text fontSize={"sm"} fontWeight={"bold"}>
+                        From Album:
+                      </Text>
+                      <Text fontSize={"sm"} fontWeight={"normal"}>
+                        {assetData?.album}
+                      </Text>
+                      <Text mt="10px" fontSize={"xs"} fontWeight={"light"}>
+                        Other photos from this album:
+                      </Text>
+                    </Box>
+                  ) : null}
+                  <SimpleGrid
+                    columns={[2, 3, 3, 3]}
+                    gap={"10px"}
+                    padding={["20px", "10px", "50px", "10px"]}
+                  >
+                    {album ? (
+                      album?.map((item, index) => {
+                        return (
+                          <Box key={index} width="100%">
+                            <Card
+                              height={["300px", "110px", "150px", "180px"]}
+                              variant="elevated"
+                              overflow={"hidden"}
+                              p={["10px", "10px", "10px", "10px"]}
+                            >
+                              <Image
+                                shadow="sm"
+                                borderRadius={"md"}
+                                objectFit="cover"
+                                width={["100%", "100%", "100%", "100%"]}
+                                height={["90px", "90px", "130px", "160px"]}
+                                fallbackSrc={`${imgUrl}`}
+                                src={`${
+                                  item.links !== undefined
+                                    ? item.links[0].href
+                                    : imgError
+                                }`}
+                              />
+                            </Card>
+                          </Box>
+                        );
+                      })
+                    ) : (
+                      <Box>
+                        <Text fontSize={"sm"} fontWeight={"bold"}>
+                          No Album Found
+                        </Text>
+                      </Box>
+                    )}
+                  </SimpleGrid>
                 </Stack>
               </Box>
             </Flex>
